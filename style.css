@@ -1,0 +1,25 @@
+body {
+  font-family: 'Tahoma', sans-serif;
+  direction: rtl;
+  background: #f0f8ff;
+  color: #333;
+}
+.container {
+  width: 90%;
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  margin-top: 50px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+button {
+  padding: 10px 15px;
+  margin-top: 10px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
