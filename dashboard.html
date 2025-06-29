@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>مرحباً بك</h2>
+    <p id="userEmail"></p>
+    <p>نقاطك: <span id="points">0</span></p>
+
+    <h3>رابط صفحتك على فيسبوك</h3>
+    <input type="text" id="pageInput" placeholder="ضع رابط صفحتك">
+    <button id="savePageBtn">حفظ</button>
+
+    <h3>تابع صفحات الآخرين لكسب النقاط</h3>
+    <ul id="pagesList"></ul>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
