@@ -3,7 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <title>تسجيل الدخول</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(to right, #e0f7e9, #d0f0dc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      direction: rtl;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 30px;
+      color: #2e7d32;
+    }
+
+    #googleBtn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 100%;
+    }
+
+    #googleBtn:hover {
+      background-color: #43a047;
+      transform: scale(1.03);
+    }
+
+    #status {
+      margin-top: 20px;
+      color: #555;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
