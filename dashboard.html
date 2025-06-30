@@ -6,10 +6,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- السطر الأخضر العريض -->
+  <div class="top-bar"></div>
+
   <div class="container">
     <h2>مرحباً بك</h2>
     <p id="userEmail"></p>
     <p>نقاطك: <span id="points">0</span></p>
+
+    <!-- زر رابط الإحالة -->
+    <button id="refBtn">رابط الإحالة</button>
+    <div id="refArea" class="hidden">
+      <input type="text" id="refLink" readonly>
+      <button id="copyRef">نسخ</button>
+    </div>
 
     <h3>رابط صفحتك على فيسبوك</h3>
     <input type="text" id="pageInput" placeholder="ضع رابط صفحتك">
