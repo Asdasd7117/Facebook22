@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>لوحة المشرف</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>لوحة الإدارة</title>
 </head>
 <body>
-  <div class="container">
-    <h2>لوحة المشرف</h2>
+  <div id="loginSection">
+    <h2>تسجيل دخول الأدمن</h2>
+    <input type="text" id="adminUser" placeholder="اسم المستخدم"><br>
+    <input type="password" id="adminPass" placeholder="كلمة المرور"><br>
+    <button id="loginBtn">تسجيل الدخول</button>
+  </div>
+
+  <div id="adminPanel" style="display:none">
+    <h2>لوحة التحكم</h2>
     <ul id="userList"></ul>
   </div>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script type="module" src="admin.js"></script>
+  <script type="module" src="./admin.js"></script>
 </body>
 </html>
