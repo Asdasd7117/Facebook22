@@ -6,7 +6,7 @@ import {
   getDocs, collection, doc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-const ADMIN_EMAIL = "admin@example.com"; // غيّره لبريدك
+const ADMIN_EMAIL = "ag7002011@gmail.com"; // غيّره لبريدك
 
 onAuthStateChanged(auth, async user => {
   if (!user || user.email !== ADMIN_EMAIL) {
