@@ -1,50 +1,60 @@
-import { auth, db } from './firebase-config.js';
+import { db } from './firebase-config.js';
 import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import {
-  getDocs, collection, doc, updateDoc, deleteDoc
+  getDocs, doc, collection, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-const ADMIN_EMAIL = "ag7002011@gmail.com"; // غيّره لبريدك
+const adminUser = "samigmail";
+const adminPass = "Asdasd7117";
 
-onAuthStateChanged(auth, async user => {
-  if (!user || user.email !== ADMIN_EMAIL) {
-    document.body.innerHTML = "<h2 style='color:red'>غير مصرح لك بالدخول.</h2>";
-    return;
+document.getElementById("loginBtn").onclick = () => {
+  const user = document.getElementById("adminUser").value;
+  const pass = document.getElementById("adminPass").value;
+
+  if (user === adminUser && pass === adminPass) {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    loadUsers();
+  } else {
+    alert("ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¯ط®ظˆظ„ ط؛ظٹط± طµط­ظٹط­ط©");
   }
+};
 
-  const userList = document.getElementById("userList");
-  const snapshot = await getDocs(collection(db, "users"));
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
+async function loadUsers() {
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+  const usersSnap = await getDocs(collection(db, "users"));
+
+  usersSnap.forEach(snap => {
+    const data = snap.data();
+    const uid = snap.id;
     const li = document.createElement("li");
     li.innerHTML = `
-      <p><strong>${data.email}</strong> - ${data.points} نقاط</p>
-      <button onclick="addPoints('${docSnap.id}')">+10 نقاط</button>
-      <button onclick="removeUser('${docSnap.id}')">🗑 حذف المستخدم</button>
-      <button onclick="removePage('${docSnap.id}')">❌ إزالة الصفحة</button>
+      <strong>${data.email || "ط¨ظ„ط§ ط¨ط±ظٹط¯"}</strong> | ظ†ظ‚ط§ط·: ${data.points || 0}<br/>
+      <button onclick="givePoints('${uid}', ${data.points || 0})">â‍• ط£ط¶ظپ ظ†ظ‚ط·ط©</button>
+      <button onclick="removePage('${uid}')">â‌Œ ط­ط°ظپ طµظپط­طھظ‡</button>
+      <button onclick="removeUser('${uid}')">ًں—‘ï¸ڈ ط­ط°ظپ ط§ظ„ظ…ط³طھط®ط¯ظ…</button>
+      <hr/>
     `;
-    userList.appendChild(li);
+    list.appendChild(li);
   });
+}
 
-  window.addPoints = async (uid) => {
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, { points: 10 });
-    alert("تمت إضافة النقاط.");
-    location.reload();
-  };
+window.givePoints = async (uid, current) => {
+  await updateDoc(doc(db, "users", uid), { points: current + 1 });
+  alert("طھظ…طھ ط¥ط¶ط§ظپط© ظ†ظ‚ط·ط©.");
+  loadUsers();
+};
 
-  window.removeUser = async (uid) => {
+window.removePage = async (uid) => {
+  await updateDoc(doc(db, "users", uid), { facebookPage: "" });
+  alert("طھظ… ط­ط°ظپ ط±ط§ط¨ط· طµظپط­ط© ط§ظ„ظ…ط³طھط®ط¯ظ….");
+  loadUsers();
+};
+
+window.removeUser = async (uid) => {
+  if (confirm("ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ط£ظ†ظƒ طھط±ظٹط¯ ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ…ط³طھط®ط¯ظ…طں")) {
     await deleteDoc(doc(db, "users", uid));
-    alert("تم حذف المستخدم.");
-    location.reload();
-  };
-
-  window.removePage = async (uid) => {
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, { facebookPage: "" });
-    alert("تم إزالة الصفحة.");
-    location.reload();
-  };
-});
+    alert("طھظ… ط­ط°ظپ ط§ظ„ظ…ط³طھط®ط¯ظ….");
+    loadUsers();
+  }
+};
