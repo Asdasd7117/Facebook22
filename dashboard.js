@@ -44,7 +44,6 @@ onAuthStateChanged(auth, async user => {
   };
 
   loadOtherPages();
-  checkReferralReward();
 });
 
 async function loadOtherPages() {
@@ -91,7 +90,11 @@ window.confirmFollow = async (targetId, btn) => {
 
   fileInput.onchange = async () => {
     const file = fileInput.files[0];
-    if (!file) return alert("❌ لم يتم رفع صورة.");
+    if (!file) return alert("❌ يجب رفع صورة شاشة كدليل المتابعة.");
+
+    const storageRef = ref(storage, `proofs/${auth.currentUser.uid}_${targetId}_${Date.now()}`);
+    await uploadBytes(storageRef, file);
+    const screenshotUrl = await getDownloadURL(storageRef);
 
     const freshUser = await getDoc(doc(db, "users", auth.currentUser.uid));
     const freshUserData = freshUser.data();
@@ -104,10 +107,6 @@ window.confirmFollow = async (targetId, btn) => {
       return;
     }
 
-    const storageRef = ref(getStorage(), `proofs/${auth.currentUser.uid}_${targetId}_${Date.now()}`);
-    await uploadBytes(storageRef, file);
-    const screenshotUrl = await getDownloadURL(storageRef);
-
     await updateDoc(userRef, {
       points: (freshUserData.points || 0) + 1,
       followers: arrayUnion(targetId),
@@ -115,12 +114,10 @@ window.confirmFollow = async (targetId, btn) => {
       [`proofs.${targetId}`]: screenshotUrl
     });
 
-    await updateDoc(tRef, {
-      points: tData.points - 1
-    });
+    await updateDoc(tRef, { points: tData.points - 1 });
 
     btn.parentElement.remove();
-    alert("✅ تم التحقق وإضافة النقطة بنجاح");
+    alert("✅ تم رفع الصورة وتأكيد المتابعة وإضافة النقطة بنجاح.");
 
     const updated = (await getDoc(userRef)).data();
     if (updated.followCount >= 5 && updated.referrer && !updated.referralCredited) {
@@ -129,52 +126,6 @@ window.confirmFollow = async (targetId, btn) => {
       await updateDoc(refRef, { points: (refData.points || 0) + 10 });
       await updateDoc(userRef, { referralCredited: true });
       alert("🎁 مكافأة إحالة: +10 نقاط أضيفت لمُحيلك!");
-    }
-  };
-
-  fileInput.click();
-};
-  const confirmFollow = confirm("هل تابعت الصفحة فعلاً؟ سيُطلب منك رفع لقطة شاشة.");
-  if (!confirmFollow) return;
-
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-
-  fileInput.onchange = async () => {
-    const file = fileInput.files[0];
-    if (!file) return alert("يجب رفع صورة شاشة كدليل المتابعة.");
-
-    const storageRef = ref(storage, `proofs/${currentUser.uid}_${targetId}_${Date.now()}`);
-    await uploadBytes(storageRef, file);
-    const screenshotUrl = await getDownloadURL(storageRef);
-
-    const tRef  = doc(db, "users", targetId);
-    const tData = (await getDoc(tRef)).data();
-    if ((tData.points || 0) < 1) {
-      alert("صاحب الصفحة لا يملك نقاطاً كافية.");
-      return;
-    }
-
-    await updateDoc(userRef, {
-      points: (userData.points || 0) + 1,
-      followers: arrayUnion(targetId),
-      followCount: (userData.followCount || 0) + 1,
-      [`proofs.${targetId}`]: screenshotUrl
-    });
-
-    await updateDoc(tRef, { points: tData.points - 1 });
-
-    btn.parentElement.remove();
-    alert("✅ تم رفع لقطة الشاشة وتأكيد المتابعة.");
-
-    const updated = (await getDoc(userRef)).data();
-    if (updated.followCount >= 5 && updated.referrer && !updated.referralCredited) {
-      const refRef = doc(db, "users", updated.referrer);
-      const refData = (await getDoc(refRef)).data() || {};
-      await updateDoc(refRef, { points: (refData.points || 0) + 10 });
-      await updateDoc(userRef, { referralCredited: true });
-      alert("🎉 مكافأة إحالة: +10 نقاط لمُحيلك!");
     }
   };
 
