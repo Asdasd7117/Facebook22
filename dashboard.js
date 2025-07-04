@@ -1,4 +1,4 @@
-import { auth, db } from './firebase-config.js';
+import { auth, db, storage } from './firebase-config.js';
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
@@ -6,10 +6,8 @@ import {
   getDoc, updateDoc, getDocs, doc, collection, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 import {
-  getStorage, ref, uploadBytes, getDownloadURL
+  ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
-
-const storage = getStorage();
 
 let currentUser, userRef, userData;
 
@@ -22,7 +20,6 @@ onAuthStateChanged(auth, async user => {
   document.getElementById("userEmail").innerText = user.email;
   document.getElementById("points").innerText    = userData.points || 0;
 
-  // رابط الإحالة
   const link = `${location.origin}/index.html?ref=${user.uid}`;
   document.getElementById("refBtn").onclick = () => {
     document.getElementById("refArea").classList.toggle("hidden");
@@ -37,12 +34,12 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("pageInput").value = userData.facebookPage;
   }
 
-  // حفظ رابط الصفحة
   document.getElementById("savePageBtn").onclick = async () => {
     const url = document.getElementById("pageInput").value.trim();
     if (!url.startsWith('http')) return alert("رابط غير صالح");
     await updateDoc(userRef, { facebookPage: url });
-    alert("✅ تم حفظ رابط صفحتك بنجاح");
+    alert("✅ تم حفظ رابط صفحتك");
+    location.reload();
   };
 
   loadOtherPages();
@@ -92,49 +89,49 @@ window.confirmFollow = async (targetId, btn) => {
 
   fileInput.onchange = async () => {
     const file = fileInput.files[0];
-    if (!file) return alert("❌ يجب رفع صورة شاشة كدليل المتابعة.");
+    if (!file) return alert("❌ يجب رفع صورة شاشة");
 
-    // رفع الصورة
-    const storageRef = ref(storage, `proofs/${auth.currentUser.uid}_${targetId}_${Date.now()}`);
-    await uploadBytes(storageRef, file);
-    const screenshotUrl = await getDownloadURL(storageRef);
+    try {
+      const storageRef = ref(storage, `proofs/${auth.currentUser.uid}_${targetId}_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const screenshotUrl = await getDownloadURL(storageRef);
 
-    // تحديث بيانات المستخدم
-    const freshUserDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-    const freshUserData = freshUserDoc.data();
+      const freshUserDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+      const freshUserData = freshUserDoc.data();
 
-    const tRef  = doc(db, "users", targetId);
-    const tData = (await getDoc(tRef)).data();
+      const tRef  = doc(db, "users", targetId);
+      const tData = (await getDoc(tRef)).data();
 
-    if ((tData.points || 0) < 1) {
-      alert("❌ صاحب الصفحة لا يملك نقاط.");
-      return;
-    }
+      if ((tData.points || 0) < 1) {
+        alert("❌ صاحب الصفحة لا يملك نقاط.");
+        return;
+      }
 
-    // إضافة النقطة للمستخدم
-    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-      points: (freshUserData.points || 0) + 1,
-      followers: arrayUnion(targetId),
-      followCount: (freshUserData.followCount || 0) + 1,
-      [`proofs.${targetId}`]: screenshotUrl
-    });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        points: (freshUserData.points || 0) + 1,
+        followers: arrayUnion(targetId),
+        followCount: (freshUserData.followCount || 0) + 1,
+        [`proofs.${targetId}`]: screenshotUrl
+      });
 
-    // خصم نقطة من صاحب الصفحة
-    await updateDoc(tRef, {
-      points: (tData.points || 1) - 1
-    });
+      await updateDoc(tRef, {
+        points: (tData.points || 1) - 1
+      });
 
-    btn.parentElement.remove();
-    alert("✅ تم رفع الصورة وتأكيد المتابعة وإضافة النقطة بنجاح.");
+      btn.parentElement.remove();
+      alert("✅ تمت إضافة النقطة بنجاح!");
 
-    // مكافأة الإحالة
-    const updated = (await getDoc(doc(db, "users", auth.currentUser.uid))).data();
-    if (updated.followCount >= 5 && updated.referrer && !updated.referralCredited) {
-      const refRef = doc(db, "users", updated.referrer);
-      const refData = (await getDoc(refRef)).data() || {};
-      await updateDoc(refRef, { points: (refData.points || 0) + 10 });
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { referralCredited: true });
-      alert("🎁 مكافأة إحالة: +10 نقاط أضيفت لمُحيلك!");
+      const updated = (await getDoc(doc(db, "users", auth.currentUser.uid))).data();
+      if (updated.followCount >= 5 && updated.referrer && !updated.referralCredited) {
+        const refRef = doc(db, "users", updated.referrer);
+        const refData = (await getDoc(refRef)).data() || {};
+        await updateDoc(refRef, { points: (refData.points || 0) + 10 });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { referralCredited: true });
+        alert("🎉 مكافأة الإحالة: +10 نقاط لمُحيلك!");
+      }
+    } catch (err) {
+      console.error("❌ خطأ في رفع الصورة:", err);
+      alert("حدث خطأ أثناء رفع الصورة. تأكد من الاتصال بالإنترنت.");
     }
   };
 
